@@ -1,0 +1,67 @@
+## Master Spec: Clean Architecture API Project
+
+### Architecture
+- Pattern: Clean Architecture (Domain, Application, Infrastructure, API layers)
+- Database: [Choose: SQL Server / PostgreSQL / SQLite]
+- DB Migration Project:
+  - Separate project for EF Core migrations
+  - Responsible for applying schema changes
+  - Includes initial data seeding (e.g., default records)
+
+### Endpoints (Minimal API style)
+- Define endpoints here, each with:
+  - HTTP Method + Route
+  - Input model (DTO or primitive types)
+  - Output model (DTO)
+  - Validation rules
+  - Implementation: Minimal API endpoint in `Program.cs` calling MediatR command/query
+
+Example:
+1. GET /api/organizations/{id}
+   - Input: Id (int)
+   - Output: DTO { Id, Name, CreatedDate }
+   - Validation: Id > 0
+   - Implementation: Minimal API endpoint → MediatR Query
+
+2. POST /api/organizations
+   - Input: { Name (string, required), Description (string, optional) }
+   - Output: DTO { Id, Name, Description, CreatedDate }
+   - Validation: Name required, min length 3, Description max length 250
+   - Implementation: Minimal API endpoint → MediatR Command
+
+### Application Layer
+- Commands: CreateOrganizationCommand
+- Command Handlers: CreateOrganizationCommandHandler
+- Queries: GetOrganizationByIdQuery
+- Query Handlers: GetOrganizationByIdQueryHandler
+- Validators: FluentValidation classes for commands
+- DTOs: Data Transfer Objects
+- Mappings: AutoMapper profiles for entity ↔ DTO
+
+### Infrastructure Layer
+- EF Core DbContext configured for chosen database
+- No repository pattern (DbContext used directly)
+- Migration project handles schema + seed data
+
+### API Layer
+- Minimal API endpoints defined in `Program.cs`
+- Endpoints wired to MediatR commands/queries
+- Documentation: Scalar enabled for API docs
+
+### Additional Project
+- Unit Test Project
+- Contains tests for:
+  - Domain entities (invariants, behaviors)
+  - Application layer handlers (commands, queries)
+- Frameworks: xUnit + Moq (or similar)
+
+### Notes
+- Use CQRS with MediatR for separation of commands and queries
+- Keep Domain layer pure (no EF Core or infrastructure dependencies)
+- Ensure validation is handled in Application layer via FluentValidation
+- Configure DI in `Program.cs` for DbContext, MediatR, AutoMapper, Validators
+
+### Updates 001
+- Use .Net Core 10, EF Core 10 and all required NuGet packages with latest version
+- Use the following database connection string: "Server=localhost\\SQLEXPRESS;Database=LEMinimalAPIDB;User Id=sqluser;Password=password;TrustServerCertificate=True;"
+
